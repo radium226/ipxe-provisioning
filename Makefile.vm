@@ -1,0 +1,135 @@
+SHELL=/bin/bash
+
+NAME=ArchLinux
+OS_TYPE=ArchLinux_64
+HDD_SIZE_IN_BYTES=$(shell expr 5 \* 1024 \* 1024 \* 1024)
+RAM_SIZE_IN_BYTES=$(shell expr 2 \* 1024)
+
+./.VM:
+	mkdir -p "./.VM"
+
+./.VirtualBox: ./.VM
+	mkdir -p "./.VirtualBox"
+	export VBOX_USER_HOME="./.VirtualBox" ; \
+	VBoxManage setproperty machinefolder "${PWD}/.VM" && \
+	VBoxManage setextradata global GUI/Input/HostKeyCombination 65377
+
+.PHONY: clean
+clean: destroy
+	{ test -d "./.VirtualBox" && rm -Rf "./.VirtualBox" || true ; } && \
+	{ test -d "./.VM" && rm -Rf "./.VM" || true ; } && \
+	sleep 1
+
+.PHONY: ui
+ui: ./.VirtualBox
+	VBOX_USER_HOME="./.VirtualBox" \
+		VirtualBox
+
+./archlinux.iso:
+	wget \
+		"http://mirror.archlinux.ikoula.com/archlinux/iso/2018.07.01/archlinux-2018.07.01-x86_64.iso" \
+	 	--output-document="./archlinux.iso"
+
+./netboot.iso:
+	wget \
+		"https://boot.netboot.xyz/ipxe/netboot.xyz-efi.iso" \
+		--output-document="./netboot.iso"
+
+./.VM/ArchLinux/iPXE.iso:
+	cp \
+		"./ipxe/src/bin/ipxe.iso" \
+		"./.VM/ArchLinux/iPXE.iso" && \
+	sleep 1
+
+./.VM/ArchLinux/ArchLinux.iso: ./archlinux.iso
+	cp \
+		"./archlinux.iso" \
+		"./.VM/ArchLinux/ArchLinux.iso" && \
+	sleep 1
+
+./.VM/ArchLinux/NetBoot.iso: ./netboot.iso
+	cp \
+		"./netboot.iso" \
+		"./.VM/ArchLinux/NetBoot.iso" && \
+	sleep 1
+
+#.PHONY: setup-archlinux-iso-medium
+#setup-archlinux-iso-medium:
+#	export VBOX_USER_HOME="./.VirtualBox" ; \
+#	VBoxManage createmedium \
+#	  dvd \
+#	  --filename="./.VM/ArchLinux/ArchLinux.iso" && \
+#	 sleep 1
+
+.PHONY: iso-ArchLinux
+iso-ArchLinux: ./.VM/ArchLinux/ArchLinux.iso
+
+.PHONY: iso-iPXE
+iso-iPXE: ./.VM/ArchLinux/iPXE.iso
+
+.PHONY: iso-NetBoot
+iso-NetBoot: ./.VM/ArchLinux/NetBoot.iso
+
+./.VM/ArchLinux:
+	export VBOX_USER_HOME="./.VirtualBox" ; \
+	VBoxManage createvm \
+		--name "${NAME}" \
+		--ostype="${OS_TYPE}" \
+		--register && \
+	sleep 1
+
+./.VM/ArchLinux/ArchLinux.vdi:
+	export VBOX_USER_HOME="./.VirtualBox" ; \
+	VBoxManage createmedium \
+		disk \
+		--filename="./.VM/ArchLinux/ArchLinux.vdi" \
+		--sizebyte="${HDD_SIZE_IN_BYTES}" && \
+	sleep 1
+
+.PHONY: create
+create: ./.VirtualBox ./.VM/ArchLinux ./.VM/ArchLinux/ArchLinux.vdi iso-${ISO}
+	export VBOX_USER_HOME="./.VirtualBox" ; \
+	VBoxManage modifyvm \
+		"${NAME}" \
+		--memory="${RAM_SIZE_IN_BYTES}" \
+		--acpi="on" \
+		--boot1="dvd" \
+		--boot2="disk" \
+		--boot3="none" \
+		--firmware="efi" \
+		--vram="256" && \
+	sleep 1 && \
+	{ VBoxManage list -l vms | grep -q "SATA Controller" && true || VBoxManage storagectl "${NAME}" \
+		--name="SATA Controller" \
+		--add="sata" \
+		--portcount=2 \
+	; } && \
+	sleep 1 && \
+	VBoxManage storageattach "${NAME}" \
+		--storagectl="SATA Controller" \
+		--port=0 \
+		--device=0 \
+		--type="hdd" \
+		--medium="./.VM/ArchLinux/ArchLinux.vdi" && \
+	sleep 1 && \
+	VBoxManage storageattach "${NAME}" \
+		--storagectl="SATA Controller" \
+		--port=1 \
+		--device=0 \
+		--type="dvddrive" \
+		--medium="./.VM/ArchLinux/${ISO}.iso"
+
+.PHONY: destroy
+destroy: ./.VirtualBox
+	export VBOX_USER_HOME="./.VirtualBox" ; \
+	VBoxManage unregistervm \
+		"${NAME}" \
+		--delete || true
+
+.PHONY: start
+start:
+	export VBOX_USER_HOME="./.VirtualBox" ; \
+	VBoxManage startvm "${NAME}"
+
+.PHONY: build
+build: create

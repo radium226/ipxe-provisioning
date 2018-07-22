@@ -1,0 +1,17 @@
+./ipxe:
+	mkdir -p "./ipxe"
+
+./ipxe/src: ./ipxe
+	cd "./ipxe" && \
+	git clone "git://git.ipxe.org/ipxe.git" "."
+
+./ipxe/src/bin/ipxe.iso: ./ipxe/src
+	cd "./ipxe/src" && \
+	make
+
+.PHONY: build
+build: ./ipxe/src/bin/ipxe.iso
+
+.PHONY: clean
+clean:
+	test -d "./ipxe" && rm -Rf "./ipxe" || true

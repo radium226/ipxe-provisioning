@@ -1,0 +1,6 @@
+/.VM
+/.VirtualBox
+/ipxe
+/netboot.xyz
+*.iso
+*.log
