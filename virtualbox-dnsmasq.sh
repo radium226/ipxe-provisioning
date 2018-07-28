@@ -7,6 +7,14 @@ set -euo pipefail
 export VIRTUALBOX_FOLDER_PATH="./.virtualbox"
 export DNSMASQ_FOLDER_PATH="./.dnsmasq"
 
+archlive::build()
+{
+  cd "./archlive"
+  sudo rm -f -v work/build.make_*
+  sudo ./build.sh -v
+  cd -
+}
+
 ipxe::make_iso()
 {
   rm "./ipxe-efi.iso" || true
@@ -176,6 +184,7 @@ main()
 {
   rm -Rf "${VIRTUALBOX_FOLDER_PATH}"
 
+  archlive::build
   #ipxe::make_iso
 
   dnsmasq::init

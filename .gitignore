@@ -5,3 +5,6 @@
 *.iso
 *.log
 /archlive
+/.virtualbox
+/.dnsmasq
+
