@@ -1,7 +1,8 @@
 DNSMASQ_FOLDER_PATH = ./.dnsmasq
 
-INTERFACE_NAME = vboxnet0
-DOMAIN = vboxnet0
+IFACE_NAME = vboxnet0
+
+DOMAIN = $(IFACE_NAME)
 NETWORK_PREFIX = 192.168.56
 LEASE_TIME = 10m
 NETWORK_MASK = 255.255.255.0
@@ -17,7 +18,7 @@ $(DNSMASQ_FOLDER_PATH)/dnsmasq.conf: $(DNSMASQ_FOLDER_PATH)
 	gcc \
 		-E -x "c" -P \
 		-D DNSMASQ_FOLDER_PATH=$(DNSMASQ_FOLDER_PATH) \
-		-D INTERFACE_NAME=$(INTERFACE_NAME) \
+		-D IFACE_NAME=$(IFACE_NAME) \
 		-D DOMAIN=$(DOMAIN) \
 		-D HOST_NAME=$(HOST_NAME) \
 		-D HOST_IP=$(HOST_IP) \
@@ -27,7 +28,7 @@ $(DNSMASQ_FOLDER_PATH)/dnsmasq.conf: $(DNSMASQ_FOLDER_PATH)
 		-o "$(DNSMASQ_FOLDER_PATH)/dnsmasq.conf"
 
 .PHONY: start
-start: $(DNSMASQ_FOLDER_PATH)/dnsmasq.conf interface-create
+start: $(DNSMASQ_FOLDER_PATH)/dnsmasq.conf iface-create
 	test -f "$(DNSMASQ_FOLDER_PATH)/dnsmasq.pid" || \
 		sudo dnsmasq \
 			--conf-file="$(DNSMASQ_FOLDER_PATH)/dnsmasq.conf" \
@@ -40,22 +41,22 @@ stop:
 		true
 
 .PHONY: clean
-clean: stop interface-destroy
+clean: stop iface-destroy
 	rm -f "$(DNSMASQ_FOLDER_PATH)/dnsmasq.conf"
 	rm -f "$(DNSMASQ_FOLDER_PATH)/dnsmasq.pid"
 
-.PHONY: interface-create
-interface-create:
+.PHONY: iface-create
+iface-create:
 	make \
-		--file="./Makefile.interface" \
+		--file="./Makefile.iface" \
 		create \
-			NAME=$(INTERFACE_NAME) \
+			NAME=$(IFACE_NAME) \
 			NETWORK_MASK=$(NETWORK_MASK) \
 			HOST_IP=$(HOST_IP)
 
-.PHONY: interface-destroy
-interface-destroy:
+.PHONY: iface-destroy
+iface-destroy:
 	make \
-		--file="./Makefile.interface" \
+		--file="./Makefile.iface" \
 		destroy \
-			NAME=$(INTERFACE_NAME)
+			NAME=$(IFACE_NAME)
