@@ -2,18 +2,18 @@ NETWORK_PREFIX = 192.168.56
 NAME = vboxnet0
 HOST_IP = $(NETWORK_PREFIX).1
 NETWORK_MASK = 255.255.255.0
-WORKING_FOLDER_PATH = ./.virtualbox
+VIRTUALBOX_FOLDER_PATH = ./.virtualbox
 
-$(WORKING_FOLDER_PATH):
-	mkdir -p "$(WORKING_FOLDER_PATH)"
-	mkdir -p "$(WORKING_FOLDER_PATH)/virtual-machines"
-	export VBOX_USER_HOME="$(WORKING_FOLDER_PATH)" ; \
-	VBoxManage setproperty machinefolder "$(shell readlink -f $(WORKING_FOLDER_PATH))/virtual-machines" && \
+$(VIRTUALBOX_FOLDER_PATH):
+	mkdir -p "$(VIRTUALBOX_FOLDER_PATH)"
+	mkdir -p "$(VIRTUALBOX_FOLDER_PATH)/virtual-machines"
+	export VBOX_USER_HOME="$(VIRTUALBOX_FOLDER_PATH)" ; \
+	VBoxManage setproperty machinefolder "$(shell readlink -f $(VIRTUALBOX_FOLDER_PATH))/virtual-machines" && \
 	VBoxManage setextradata global GUI/Input/HostKeyCombination 65377
 
 .PHONY: create
-create: $(WORKING_FOLDER_PATH)
-	export VBOX_USER_HOME="$(WORKING_FOLDER_PATH)" ; \
+create: $(VIRTUALBOX_FOLDER_PATH)
+	export VBOX_USER_HOME="$(VIRTUALBOX_FOLDER_PATH)" ; \
 	{ VBoxManage list hostonlyifs | grep -E "^Name:" | grep "$(NAME)" ; } || \
 		{ \
 			VBoxManage hostonlyif \
@@ -26,7 +26,7 @@ create: $(WORKING_FOLDER_PATH)
 
 .PHONY: delete
 delete:
-	export VBOX_USER_HOME="$(WORKING_FOLDER_PATH)" ; \
+	export VBOX_USER_HOME="$(VIRTUALBOX_FOLDER_PATH)" ; \
 	{ VBoxManage list hostonlyifs | grep -E "^Name:" | grep "$(NAME)" ; } && \
 		{ VBoxManage hostonlyif \
 			remove "$(NAME)" ; } || \
