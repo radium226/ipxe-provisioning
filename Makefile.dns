@@ -1,4 +1,4 @@
-WORKING_FOLDER_PATH = ./.dnsmasq
+DNSMASQ_FOLDER_PATH = ./.dnsmasq
 
 INTERFACE_NAME = vboxnet0
 DOMAIN = vboxnet0
@@ -10,13 +10,13 @@ HOST_IP = $(NETWORK_PREFIX).1
 DHCP_RANGE = $(NETWORK_PREFIX).102,$(NETWORK_PREFIX).200,$(LEASE_TIME)
 USER = $(shell id -un)
 
-$(WORKING_FOLDER_PATH):
-	mkdir -p "$(WORKING_FOLDER_PATH)"
+$(DNSMASQ_FOLDER_PATH):
+	mkdir -p "$(DNSMASQ_FOLDER_PATH)"
 
-$(WORKING_FOLDER_PATH)/dnsmasq.conf: $(WORKING_FOLDER_PATH)
+$(DNSMASQ_FOLDER_PATH)/dnsmasq.conf: $(DNSMASQ_FOLDER_PATH)
 	gcc \
 		-E -x "c" -P \
-		-D WORKING_FOLDER_PATH=$(WORKING_FOLDER_PATH) \
+		-D DNSMASQ_FOLDER_PATH=$(DNSMASQ_FOLDER_PATH) \
 		-D INTERFACE_NAME=$(INTERFACE_NAME) \
 		-D DOMAIN=$(DOMAIN) \
 		-D HOST_NAME=$(HOST_NAME) \
@@ -24,25 +24,25 @@ $(WORKING_FOLDER_PATH)/dnsmasq.conf: $(WORKING_FOLDER_PATH)
 		-D DHCP_RANGE=$(DHCP_RANGE) \
 		-D USER=$(USER) \
 		"./dnsmasq.conf.in" \
-		-o "$(WORKING_FOLDER_PATH)/dnsmasq.conf"
+		-o "$(DNSMASQ_FOLDER_PATH)/dnsmasq.conf"
 
 .PHONY: start
-start: $(WORKING_FOLDER_PATH)/dnsmasq.conf interface-create
-	test -f "$(WORKING_FOLDER_PATH)/dnsmasq.pid" || \
+start: $(DNSMASQ_FOLDER_PATH)/dnsmasq.conf interface-create
+	test -f "$(DNSMASQ_FOLDER_PATH)/dnsmasq.pid" || \
 		sudo dnsmasq \
-			--conf-file="$(WORKING_FOLDER_PATH)/dnsmasq.conf" \
-			--pid-file="$(shell readlink -f $(WORKING_FOLDER_PATH))/dnsmasq.pid"
+			--conf-file="$(DNSMASQ_FOLDER_PATH)/dnsmasq.conf" \
+			--pid-file="$(shell readlink -f $(DNSMASQ_FOLDER_PATH))/dnsmasq.pid"
 
 .PHONY: stop
 stop:
-	test -f "$(WORKING_FOLDER_PATH)/dnsmasq.pid" && \
-		kill $(shell cat "$(WORKING_FOLDER_PATH)/dnsmasq.pid") || \
+	test -f "$(DNSMASQ_FOLDER_PATH)/dnsmasq.pid" && \
+		kill $(shell cat "$(DNSMASQ_FOLDER_PATH)/dnsmasq.pid") || \
 		true
 
 .PHONY: clean
 clean: stop interface-destroy
-	rm -f "$(WORKING_FOLDER_PATH)/dnsmasq.conf"
-	rm -f "$(WORKING_FOLDER_PATH)/dnsmasq.pid"
+	rm -f "$(DNSMASQ_FOLDER_PATH)/dnsmasq.conf"
+	rm -f "$(DNSMASQ_FOLDER_PATH)/dnsmasq.pid"
 
 .PHONY: interface-create
 interface-create:
