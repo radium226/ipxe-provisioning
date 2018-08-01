@@ -15,14 +15,12 @@ $(VIRTUALBOX_FOLDER_PATH):
 create: $(VIRTUALBOX_FOLDER_PATH)
 	export VBOX_USER_HOME="$(VIRTUALBOX_FOLDER_PATH)" ; \
 	{ VBoxManage list hostonlyifs | grep -E "^Name:" | grep "$(NAME)" ; } || \
-		{ \
-			VBoxManage hostonlyif \
+		{ VBoxManage hostonlyif \
 				create && \
 			VBoxManage hostonlyif \
       	ipconfig "$(NAME)" \
 	        --ip "$(HOST_IP)" \
-	        --netmask "$(NETWORK_MASK)" ; \
-		}
+	        --netmask "$(NETWORK_MASK)" ; }
 
 .PHONY: delete
 delete:
