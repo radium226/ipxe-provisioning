@@ -1,0 +1,12 @@
+except-interface=lo0
+interface=INTERFACE_NAME
+bind-interfaces
+dhcp-range=DHCP_RANGE
+dhcp-leasefile=WORKING_FOLDER_PATH/dnsmasq-leasefile.DOMAIN
+local=/DOMAIN/
+expand-hosts
+domain=DOMAIN
+address=/HOST_NAME.DOMAIN/HOST_IP
+log-queries
+log-facility=-
+user=USER

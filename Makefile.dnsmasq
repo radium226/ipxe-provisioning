@@ -1,0 +1,61 @@
+WORKING_FOLDER_PATH = ./.dnsmasq
+
+INTERFACE_NAME = vboxnet0
+DOMAIN = vboxnet0
+NETWORK_PREFIX = 192.168.56
+LEASE_TIME = 10m
+NETWORK_MASK = 255.255.255.0
+HOST_NAME = virtualbox
+HOST_IP = $(NETWORK_PREFIX).1
+DHCP_RANGE = $(NETWORK_PREFIX).102,$(NETWORK_PREFIX).200,$(LEASE_TIME)
+USER = $(shell id -un)
+
+$(WORKING_FOLDER_PATH):
+	mkdir -p "$(WORKING_FOLDER_PATH)"
+
+$(WORKING_FOLDER_PATH)/dnsmasq.conf: $(WORKING_FOLDER_PATH)
+	gcc \
+		-E -x "c" -P \
+		-D WORKING_FOLDER_PATH=$(WORKING_FOLDER_PATH) \
+		-D INTERFACE_NAME=$(INTERFACE_NAME) \
+		-D DOMAIN=$(DOMAIN) \
+		-D HOST_NAME=$(HOST_NAME) \
+		-D HOST_IP=$(HOST_IP) \
+		-D DHCP_RANGE=$(DHCP_RANGE) \
+		-D USER=$(USER) \
+		"./dnsmasq.conf.in" \
+		-o "$(WORKING_FOLDER_PATH)/dnsmasq.conf"
+
+.PHONY: start
+start: $(WORKING_FOLDER_PATH)/dnsmasq.conf interface-create
+	test -f "$(WORKING_FOLDER_PATH)/dnsmasq.pid" || \
+		sudo dnsmasq \
+			--conf-file="$(WORKING_FOLDER_PATH)/dnsmasq.conf" \
+			--pid-file="$(shell readlink -f $(WORKING_FOLDER_PATH))/dnsmasq.pid"
+
+.PHONY: stop
+stop:
+	test -f "$(WORKING_FOLDER_PATH)/dnsmasq.pid" && \
+		kill $(shell cat "$(WORKING_FOLDER_PATH)/dnsmasq.pid") || \
+		true
+
+.PHONY: clean
+clean: stop interface-delete
+	rm -f "$(WORKING_FOLDER_PATH)/dnsmasq.conf"
+	rm -f "$(WORKING_FOLDER_PATH)/dnsmasq.pid"
+
+.PHONY: interface-create
+interface-create:
+	make \
+		--file="./Makefile.interface" \
+		create \
+			NAME=$(INTERFACE_NAME) \
+			NETWORK_MASK=$(NETWORK_MASK) \
+			HOST_IP=$(HOST_IP)
+
+.PHONY: interface-delete
+interface-delete:
+	make \
+		--file="./Makefile.interface" \
+		delete \
+			NAME=$(INTERFACE_NAME)
