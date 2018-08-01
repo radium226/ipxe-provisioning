@@ -40,7 +40,7 @@ stop:
 		true
 
 .PHONY: clean
-clean: stop interface-delete
+clean: stop interface-destroy
 	rm -f "$(WORKING_FOLDER_PATH)/dnsmasq.conf"
 	rm -f "$(WORKING_FOLDER_PATH)/dnsmasq.pid"
 
@@ -53,9 +53,9 @@ interface-create:
 			NETWORK_MASK=$(NETWORK_MASK) \
 			HOST_IP=$(HOST_IP)
 
-.PHONY: interface-delete
-interface-delete:
+.PHONY: interface-destroy
+interface-destroy:
 	make \
 		--file="./Makefile.interface" \
-		delete \
+		destroy \
 			NAME=$(INTERFACE_NAME)
