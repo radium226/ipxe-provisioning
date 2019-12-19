@@ -1,0 +1,10 @@
+.PHONY: build
+build: ./netboot.xyz/src
+
+
+./netboot.xyz:
+	mkdir -p "./netboot.xyz"
+
+./netboot.xyz/src: ./netboot.xyz
+	cd "./netboot.xyz" && \
+	git clone "https://github.com/antonym/netboot.xyz.git" "."

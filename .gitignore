@@ -1,0 +1,10 @@
+/.VM
+/.VirtualBox
+/ipxe
+/netboot.xyz
+*.iso
+*.log
+/archlive
+/.virtualbox
+/.dnsmasq
+

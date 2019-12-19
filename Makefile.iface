@@ -1,0 +1,31 @@
+NETWORK_PREFIX = 192.168.56
+NAME = vboxnet0
+HOST_IP = $(NETWORK_PREFIX).1
+NETWORK_MASK = 255.255.255.0
+VIRTUALBOX_FOLDER_PATH = ./.virtualbox
+
+.PHONY: virtualbox-initialize
+virtualbox-initialize:
+	make \
+		--file "./Makefile.virtualbox" \
+		initialize \
+			FOLDER_PATH=$(VIRTUALBOX_FOLDER_PATH)
+
+.PHONY: create
+create: $(VIRTUALBOX_FOLDER_PATH)
+	export VBOX_USER_HOME="$(VIRTUALBOX_FOLDER_PATH)" ; \
+	{ VBoxManage list hostonlyifs | grep -E "^Name:" | grep "$(NAME)" ; } || \
+		{ VBoxManage hostonlyif \
+				create && \
+			VBoxManage hostonlyif \
+      	ipconfig "$(NAME)" \
+	        --ip "$(HOST_IP)" \
+	        --netmask "$(NETWORK_MASK)" ; }
+
+.PHONY: destroy
+destroy:
+	export VBOX_USER_HOME="$(VIRTUALBOX_FOLDER_PATH)" ; \
+	{ VBoxManage list hostonlyifs | grep -E "^Name:" | grep "$(NAME)" ; } && \
+		{ VBoxManage hostonlyif \
+			remove "$(NAME)" ; } || \
+		true

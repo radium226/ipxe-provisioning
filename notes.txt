@@ -1,0 +1,13 @@
+https://ramonnogueira.wordpress.com/2013/03/29/simple-way-to-run-dnsmasq-for-virtualbox-guest-dhcp/
+
+https://www.archlinux.org/releng/netboot/archlinux.ipxe
+
+https://aur.archlinux.org/packages/ipxe-netboot/
+
+https://wiki.archlinux.org/index.php/archiso#Creating_a_offline_installation_ISO
+
+https://wiki.archlinux.org/index.php/PXE
+
+https://wiki.archlinux.org/index.php/Remastering_the_Install_ISO
+
+https://en.wikipedia.org/wiki/Linux_startup_process
