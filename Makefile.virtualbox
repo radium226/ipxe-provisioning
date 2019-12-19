@@ -1,0 +1,15 @@
+FOLDER_PATH = "./.virtualbox"
+
+$(FOLDER_PATH):
+	mkdir -p "$(FOLDER_PATH)"
+
+.PHONY: initialize
+initialize: $(FOLDER_PATH)
+	mkdir -p "$(FOLDER_PATH)/machines"
+	export VBOX_USER_HOME="$(FOLDER_PATH)" ; \
+	VBoxManage setproperty machinefolder "$(shell readlink -f "$(FOLDER_PATH)")/machines" && \
+	VBoxManage setextradata global GUI/Input/HostKeyCombination 65377
+
+.PHONY: clean
+clean:
+	rm -Rf "$(FOLDER_PATH)"

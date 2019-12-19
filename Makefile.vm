@@ -1,18 +1,18 @@
 SHELL=/bin/bash
 
-NAME=ArchLinux
-OS_TYPE=ArchLinux_64
-HDD_SIZE_IN_BYTES=$(shell expr 5 \* 1024 \* 1024 \* 1024)
-RAM_SIZE_IN_BYTES=$(shell expr 2 \* 1024)
+VIRTUALBOX_FOLDER_PATH = "./.virtualbox"
 
-./.VM:
-	mkdir -p "./.VM"
+NAME = ArchLinux
+OS_TYPE = ArchLinux_64
+HDD_SIZE_IN_BYTES = $(shell expr 5 \* 1024 \* 1024 \* 1024)
+RAM_SIZE_IN_BYTES = $(shell expr 2 \* 1024)
 
-./.VirtualBox: ./.VM
-	mkdir -p "./.VirtualBox"
-	export VBOX_USER_HOME="./.VirtualBox" ; \
-	VBoxManage setproperty machinefolder "${PWD}/.VM" && \
-	VBoxManage setextradata global GUI/Input/HostKeyCombination 65377
+.PHONY: virtualbox-initialize
+virtualbox-initialize:
+	make \
+		--file "./Makefile.virtualbox" \
+		initialize \
+			FOLDER_PATH=$(VIRTUALBOX_FOLDER_PATH)
 
 .PHONY: clean
 clean: destroy
